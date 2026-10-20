@@ -1,5 +1,12 @@
 // GANTI DENGAN URL GOOGLE APPS SCRIPT KAMU
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJHbONqp-1JHDREvr3CwMHWw2k7NH8j6YN2sXcBHNizdblX9KvE7v2z1OAXj6f-JM/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+
+// PEMUATAN ASET GAMBAR CANVA
+const heroImg = new Image();
+heroImg.src = 'assets/hero.png';
+
+const turretImg = new Image();
+turretImg.src = 'assets/turret.png';
 
 // BANK SOAL MATERI DRAMA
 const bankSoal = [
@@ -11,8 +18,8 @@ const bankSoal = [
 ];
 
 let canvas, ctx;
-let player = { x: 50, y: 320, size: 15, hp: 100, speed: 2 };
-let turret = { x: 300, y: 80, size: 25, hp: 100 };
+let player = { x: 50, y: 320, size: 20, hp: 100, speed: 2 };
+let turret = { x: 300, y: 80, size: 30, hp: 100 };
 let joystick = { active: false, startX: 0, startY: 0, moveX: 0, moveY: 0 };
 
 let skor = 0;
@@ -33,7 +40,6 @@ function startGame() {
     gameLoop();
 }
 
-// LOGIKA PERGERAKAN JOYSTICK
 function initJoystick() {
     const base = document.getElementById("joystick-base");
     const stick = document.getElementById("joystick-stick");
@@ -71,57 +77,47 @@ function initJoystick() {
     });
 }
 
-// LOOP ANIMASI GAME (RENDER 60FPS)
 function gameLoop() {
-    // Gerakkan player berdasarkan Joystick
     player.x += joystick.moveX * player.speed;
     player.y += joystick.moveY * player.speed;
 
-    // Batasi pergerakan di dalam canvas
-    player.x = Math.max(15, Math.min(canvas.width - 15, player.x));
-    player.y = Math.max(15, Math.min(canvas.height - 15, player.y));
+    player.x = Math.max(20, Math.min(canvas.width - 20, player.x));
+    player.y = Math.max(20, Math.min(canvas.height - 20, player.y));
 
-    // Buka gambar canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Gambar Arena (Lane)
+    // Jalur / Lane
     ctx.strokeStyle = "#444";
-    ctx.lineWidth = 20;
+    ctx.lineWidth = 30;
     ctx.beginPath();
     ctx.moveTo(50, 320);
     ctx.lineTo(300, 80);
     ctx.stroke();
 
-    // Gambar Hero Pemain (Biru)
-    ctx.fillStyle = "#007bff";
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
-    ctx.fill();
+    // Gambar Hero dari Canva
+    ctx.drawImage(heroImg, player.x - 20, player.y - 20, 40, 40);
 
-    // Health Bar Player
+    // Health Bar Hero
     ctx.fillStyle = "red";
-    ctx.fillRect(player.x - 15, player.y - 25, 30, 5);
+    ctx.fillRect(player.x - 20, player.y - 30, 40, 5);
     ctx.fillStyle = "#00ff00";
-    ctx.fillRect(player.x - 15, player.y - 25, (player.hp / 100) * 30, 5);
+    ctx.fillRect(player.x - 20, player.y - 30, (player.hp / 100) * 40, 5);
 
-    // Gambar Turret Musuh (Merah)
-    ctx.fillStyle = "#dc3545";
-    ctx.fillRect(turret.x - 15, turret.y - 15, 30, 30);
+    // Gambar Turret dari Canva
+    ctx.drawImage(turretImg, turret.x - 25, turret.y - 25, 50, 50);
 
     // Health Bar Turret
     ctx.fillStyle = "red";
-    ctx.fillRect(turret.x - 20, turret.y - 25, 40, 5);
+    ctx.fillRect(turret.x - 25, turret.y - 35, 50, 5);
     ctx.fillStyle = "#00ff00";
-    ctx.fillRect(turret.x - 20, turret.y - 25, (turret.hp / 100) * 40, 5);
+    ctx.fillRect(turret.x - 25, turret.y - 35, (turret.hp / 100) * 50, 5);
 
     requestAnimationFrame(gameLoop);
 }
 
-// BUKA KUIS SAAT TOMBOL ATTACK DITEKAN
 function bukaSoal() {
-    // Hitung jarak player ke Turret
     let dist = Math.hypot(player.x - turret.x, player.y - turret.y);
-    if (dist > 100) {
+    if (dist > 120) {
         return alert("Hero kamu terlalu jauh! Dekati Turret Musuh terlebih dahulu.");
     }
 
