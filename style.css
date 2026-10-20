@@ -1,0 +1,159 @@
+* { 
+    box-sizing: border-box; 
+}
+
+body { 
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    text-align: center; 
+    background: #121212; 
+    color: white; 
+    margin: 0; 
+    padding: 10px; 
+}
+
+#app { 
+    max-width: 500px; 
+    margin: auto; 
+    background: #1e1e2f; 
+    padding: 20px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+}
+
+/* KELAS HIDDEN DENGAN IMPORTANT AGAR TIDAK BENTROK */
+.hidden { 
+    display: none !important; 
+}
+
+.subtitle {
+    color: #aaa; 
+    font-size: 14px;
+}
+
+input, button { 
+    width: 100%; 
+    padding: 12px; 
+    margin: 8px 0; 
+    border-radius: 6px; 
+    border: none; 
+    font-size: 16px; 
+}
+
+input { 
+    background: #2a2a3d; 
+    color: white; 
+    border: 1px solid #444; 
+}
+
+button { 
+    background: #007bff; 
+    color: white; 
+    font-weight: bold; 
+    cursor: pointer; 
+    transition: 0.2s; 
+}
+
+button:active { 
+    transform: scale(0.98); 
+}
+
+.btn-attack { 
+    background: linear-gradient(45deg, #ff9800, #ff5722); 
+    padding: 16px; 
+    font-size: 18px; 
+    font-weight: bold; 
+    margin-top: 15px; 
+    border-radius: 8px; 
+    box-shadow: 0 4px 10px rgba(255,152,0,0.4); 
+}
+
+.health-container { 
+    background: #2a2a3d; 
+    padding: 10px; 
+    border-radius: 8px; 
+    margin: 10px 0; 
+    text-align: left; 
+}
+
+.health-bar { 
+    background: #444; 
+    height: 18px; 
+    border-radius: 5px; 
+    overflow: hidden; 
+    margin-top: 5px; 
+}
+
+.health-fill { 
+    height: 100%; 
+    transition: width 0.4s ease-in-out; 
+}
+
+#player-hp { 
+    background: #28a745; 
+    width: 100%; 
+}
+
+#enemy-hp { 
+    background: #dc3545; 
+    width: 100%; 
+}
+
+.score-board {
+    margin-top: 20px; 
+    font-size: 14px; 
+    color: #ccc;
+}
+
+#score-text {
+    color: #ffc107;
+}
+
+.modal { 
+    background: rgba(0,0,0,0.85); 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 1000; 
+}
+
+.modal-content { 
+    background: #252538; 
+    padding: 20px; 
+    border-radius: 10px; 
+    width: 90%; 
+    max-width: 450px; 
+    text-align: left; 
+    border: 1px solid #555; 
+}
+
+#soal-text {
+    margin-top: 5px;
+}
+
+.opt-btn { 
+    background: #3a3a52; 
+    color: white; 
+    text-align: left; 
+    padding: 10px 12px; 
+    margin: 6px 0; 
+    font-size: 14px; 
+    border: 1px solid #555; 
+}
+
+.opt-btn:hover { 
+    background: #4a4a68; 
+}
+
+.badge { 
+    background: #17a2b8; 
+    padding: 3px 8px; 
+    border-radius: 4px; 
+    font-size: 12px; 
+    margin-bottom: 5px; 
+    display: inline-block; 
+}
