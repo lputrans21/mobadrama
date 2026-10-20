@@ -1,129 +1,172 @@
-// GANTI URL INI DENGAN URL GOOGLE APPS SCRIPT MILIKMU
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJHbONqp-1JHDREvr3CwMHWw2k7NH8j6YN2sXcBHNizdblX9KvE7v2z1OAXj6f-JM/exec";
+// GANTI DENGAN URL GOOGLE APPS SCRIPT KAMU
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
 
 // BANK SOAL MATERI DRAMA
 const bankSoal = [
-    {
-        kategori: "Unsur Drama",
-        q: "Petunjuk lakuan atau tindakan yang harus dilakukan oleh tokoh dalam naskah drama biasanya ditulis dalam tanda...",
-        ops: ["Tanda petik (\"...\")", "Tanda kurung (...) dan dicetak miring", "Tanda titik dua (:)", "Tanda seru (!)"],
-        a: 1
-    },
-    {
-        kategori: "Kebahasaan Drama",
-        q: "Format penulisan dialog drama yang benar di bawah ini adalah...",
-        ops: [
-            "Budi: \"Mengapa kamu terlambat?\"",
-            "Budi: Mengapa kamu terlambat?",
-            "Budi mengatakan, mengapa kamu terlambat?",
-            "\"Budi\" Mengapa kamu terlambat?"
-        ],
-        a: 1
-    },
-    {
-        kategori: "Pementasan Drama",
-        q: "Elemen pementasan drama yang bertugas mengatur pencahayaan di panggung untuk membangun suasana adalah...",
-        ops: ["Tata Busana (Kostum)", "Tata Lampu (Lighting)", "Tata Suara (Sound System)", "Tata Panggung (Sceneries)"],
-        a: 1
-    },
-    {
-        kategori: "Unsur Drama",
-        q: "Bagian dari alur drama yang menunjukkan puncak konflik atau ketegangan tertinggi dinamakan...",
-        ops: ["Orientasi", "Komplikasi", "Klimaks", "Resolusi"],
-        a: 2
-    },
-    {
-        kategori: "Kebahasaan Drama",
-        q: "Kalimat yang digunakan tokoh untuk memberikan perintah atau larangan dalam dialog drama menggunakan jenis kalimat...",
-        ops: ["Kalimat Deklaratif", "Kalimat Imperatif", "Kalimat Interogatif", "Kalimat Eksklamatif"],
-        a: 1
-    },
-    {
-        kategori: "Pementasan Drama",
-        q: "Orang yang bertanggung jawab memimpin proses latihan dan mengarahkan jalannya pementasan drama adalah...",
-        ops: ["Sutradara", "Produser", "Aktor", "Koreografer"],
-        a: 0
-    },
-    {
-        kategori: "Unsur Drama",
-        q: "Naskah pembuka atau kata pengantar yang biasanya disampaikan oleh narator sebelum pementasan drama dimulai disebut...",
-        ops: ["Prolog", "Epilog", "Monolog", "Dialog"],
-        a: 0
-    }
+    { kategori: "Unsur Drama", q: "Petunjuk lakuan tindakan tokoh dalam naskah ditulis dalam...", ops: ["Tanda petik", "Tanda kurung & cetak miring", "Tanda titik dua", "Tanda seru"], a: 1 },
+    { kategori: "Kebahasaan Drama", q: "Format penulisan dialog drama yang benar adalah...", ops: ["Budi: \"Mengapa kamu terlambat?\"", "Budi: Mengapa kamu terlambat?", "Budi mengatakan, mengapa kamu terlambat?", "\"Budi\" Mengapa kamu terlambat?"], a: 1 },
+    { kategori: "Pementasan Drama", q: "Petugas yang mengatur pencahayaan di panggung adalah...", ops: ["Tata Busana", "Tata Lampu (Lighting)", "Tata Suara", "Tata Panggung"], a: 1 },
+    { kategori: "Unsur Drama", q: "Puncak ketegangan atau konflik dalam alur drama dinamakan...", ops: ["Orientasi", "Komplikasi", "Klimaks", "Resolusi"], a: 2 },
+    { kategori: "Kebahasaan Drama", q: "Kalimat perintah/larangan dalam dialog menggunakan jenis kalimat...", ops: ["Deklaratif", "Imperatif", "Interogatif", "Eksklamatif"], a: 1 }
 ];
 
-let playerHp = 100;
-let enemyHp = 100;
+let canvas, ctx;
+let player = { x: 50, y: 320, size: 15, hp: 100, speed: 2 };
+let turret = { x: 300, y: 80, size: 25, hp: 100 };
+let joystick = { active: false, startX: 0, startY: 0, moveX: 0, moveY: 0 };
+
 let skor = 0;
 let currentSoalIndex = 0;
 
 function startGame() {
     const nama = document.getElementById("nama").value.trim();
     const kelas = document.getElementById("kelas").value.trim();
-    if (!nama || !kelas) return alert("Harap isi Nama dan Kelas terlebih dahulu!");
+    if (!nama || !kelas) return alert("Isi Nama & Kelas dulu!");
 
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("game-screen").classList.remove("hidden");
+
+    canvas = document.getElementById("gameCanvas");
+    ctx = canvas.getContext("2d");
+
+    initJoystick();
+    gameLoop();
 }
 
+// LOGIKA PERGERAKAN JOYSTICK
+function initJoystick() {
+    const base = document.getElementById("joystick-base");
+    const stick = document.getElementById("joystick-stick");
+
+    base.addEventListener("touchstart", (e) => {
+        joystick.active = true;
+        const touch = e.touches[0];
+        const rect = base.getBoundingClientRect();
+        joystick.startX = rect.left + rect.width / 2;
+        joystick.startY = rect.top + rect.height / 2;
+    });
+
+    window.addEventListener("touchmove", (e) => {
+        if (!joystick.active) return;
+        const touch = e.touches[0];
+        let dx = touch.clientX - joystick.startX;
+        let dy = touch.clientY - joystick.startY;
+        let dist = Math.hypot(dx, dy);
+
+        if (dist > 35) {
+            dx = (dx / dist) * 35;
+            dy = (dy / dist) * 35;
+        }
+
+        stick.style.transform = `translate(${dx}px, ${dy}px)`;
+        joystick.moveX = dx / 35;
+        joystick.moveY = dy / 35;
+    });
+
+    window.addEventListener("touchend", () => {
+        joystick.active = false;
+        stick.style.transform = `translate(0px, 0px)`;
+        joystick.moveX = 0;
+        joystick.moveY = 0;
+    });
+}
+
+// LOOP ANIMASI GAME (RENDER 60FPS)
+function gameLoop() {
+    // Gerakkan player berdasarkan Joystick
+    player.x += joystick.moveX * player.speed;
+    player.y += joystick.moveY * player.speed;
+
+    // Batasi pergerakan di dalam canvas
+    player.x = Math.max(15, Math.min(canvas.width - 15, player.x));
+    player.y = Math.max(15, Math.min(canvas.height - 15, player.y));
+
+    // Buka gambar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Gambar Arena (Lane)
+    ctx.strokeStyle = "#444";
+    ctx.lineWidth = 20;
+    ctx.beginPath();
+    ctx.moveTo(50, 320);
+    ctx.lineTo(300, 80);
+    ctx.stroke();
+
+    // Gambar Hero Pemain (Biru)
+    ctx.fillStyle = "#007bff";
+    ctx.beginPath();
+    ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Health Bar Player
+    ctx.fillStyle = "red";
+    ctx.fillRect(player.x - 15, player.y - 25, 30, 5);
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(player.x - 15, player.y - 25, (player.hp / 100) * 30, 5);
+
+    // Gambar Turret Musuh (Merah)
+    ctx.fillStyle = "#dc3545";
+    ctx.fillRect(turret.x - 15, turret.y - 15, 30, 30);
+
+    // Health Bar Turret
+    ctx.fillStyle = "red";
+    ctx.fillRect(turret.x - 20, turret.y - 25, 40, 5);
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(turret.x - 20, turret.y - 25, (turret.hp / 100) * 40, 5);
+
+    requestAnimationFrame(gameLoop);
+}
+
+// BUKA KUIS SAAT TOMBOL ATTACK DITEKAN
 function bukaSoal() {
-    if (currentSoalIndex >= bankSoal.length) {
-        currentSoalIndex = 0; // Ulangi dari awal jika soal habis
+    // Hitung jarak player ke Turret
+    let dist = Math.hypot(player.x - turret.x, player.y - turret.y);
+    if (dist > 100) {
+        return alert("Hero kamu terlalu jauh! Dekati Turret Musuh terlebih dahulu.");
     }
-    
+
+    if (currentSoalIndex >= bankSoal.length) currentSoalIndex = 0;
     const soal = bankSoal[currentSoalIndex];
+
     document.getElementById("kategori-soal").innerText = "Kategori: " + soal.kategori;
     document.getElementById("soal-text").innerText = soal.q;
-    
+
     const container = document.getElementById("opsi-container");
     container.innerHTML = "";
-    
+
     soal.ops.forEach((opt, idx) => {
         const btn = document.createElement("button");
         btn.className = "opt-btn";
-        btn.innerText = String.fromCharCode(65 + idx) + ". " + opt; // Menambahkan A, B, C, D
+        btn.innerText = String.fromCharCode(65 + idx) + ". " + opt;
         btn.onclick = () => jawab(idx === soal.a);
         container.appendChild(btn);
     });
 
-    document.getElementById("quiz-modal").classList.remove("hidden");
+    document.getElementById("quiz-modal").style.display = "flex";
 }
 
 function jawab(isCorrect) {
-    document.getElementById("quiz-modal").classList.add("hidden");
-    
+    document.getElementById("quiz-modal").style.display = "none";
+
     if (isCorrect) {
-        enemyHp -= 25;
-        skor += 15;
-        alert("💥 JAWABAN BENAR!\nSkill Berhasil Diluncurkan! Turret musuh menerima 25 Damage.");
+        turret.hp -= 25;
+        skor += 20;
+        alert("💥 SERANGAN BERHASIL!\nJawaban Benar! Turret Musuh Menerima 25 Damage.");
     } else {
-        playerHp -= 20;
-        alert("❌ JAWABAN SALAH!\nSeranganmu Meleset! Musuh membalas dan memberikan 20 Damage padamu.");
+        player.hp -= 20;
+        alert("❌ SERANGAN MELESET!\nJawaban Salah! Turret membalas, HP kamu berkurang 20.");
     }
 
-    updateHpBar();
     currentSoalIndex++;
-    cekKondisiSelesai();
+    cekSelesai();
 }
 
-function updateHpBar() {
-    playerHp = Math.max(0, playerHp);
-    enemyHp = Math.max(0, enemyHp);
-
-    document.getElementById("player-hp").style.width = playerHp + "%";
-    document.getElementById("enemy-hp").style.width = enemyHp + "%";
-    
-    document.getElementById("player-hp-text").innerText = playerHp;
-    document.getElementById("enemy-hp-text").innerText = enemyHp;
-    document.getElementById("score-text").innerText = skor;
-}
-
-function cekKondisiSelesai() {
-    if (enemyHp <= 0) {
-        alert("🏆 VICTORY!\nSelamat! Kamu berhasil meruntuhkan Turret Musuh dengan pengetahuan Dramamu!");
+function cekSelesai() {
+    if (turret.hp <= 0) {
+        alert("🏆 VICTORY! Turret Musuh Hancur!");
         kirimData("Victory");
-    } else if (playerHp <= 0) {
-        alert("☠️ DEFEAT!\nKaraktermu tumbang! Pelajari kembali materi drama dan coba lagi.");
+    } else if (player.hp <= 0) {
+        alert("☠️ DEFEAT! Hero kamu tumbang!");
         kirimData("Defeat");
     }
 }
@@ -142,11 +185,7 @@ function kirimData(status) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     }).then(() => {
-        alert("Data nilai berhasil disimpan ke Google Sheets!");
-        location.reload();
-    }).catch((err) => {
-        console.error("Gagal mengirim data:", err);
-        alert("Selesai! (Gagal terhubung ke Sheet, periksa URL Script)");
+        alert("Skor berhasil disimpan ke Spreadsheet!");
         location.reload();
     });
 }
