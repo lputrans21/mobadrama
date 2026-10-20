@@ -2,45 +2,42 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MOBA Edukasi: Arena Bahasa & Drama</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MOBA Kuis Drama 2D</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div id="app">
-    <!-- LAYAR UTAMA / LOGIN -->
+    <!-- LAYAR LOGIN -->
     <div id="login-screen">
-        <h2>⚔️ MOBA EDUKASI DRAMA ⚔️</h2>
-        <p class="subtitle">Kuasai Unsur & Aturan Penulisan Drama untuk Menghancurkan Turret Musuh!</p>
+        <h2>⚔️ MOBA DRAMA 2D ⚔️</h2>
+        <p class="subtitle">Gerakkan Hero & Hancurkan Turret Musuh!</p>
         <input type="text" id="nama" placeholder="Nama Lengkap" required>
         <input type="text" id="kelas" placeholder="Kelas" required>
         <button onclick="startGame()">MASUK ARENA</button>
     </div>
 
-    <!-- ARENA PERTANDINGAN -->
+    <!-- ARENA GAME (CANVAS + JOYSTICK) -->
     <div id="game-screen" class="hidden">
-        <h3>⚔️ Pertarungan 1v1 Arena ⚔️</h3>
-        
-        <div class="health-container">
-            <strong>🛡️ Hero Kamu (HP: <span id="player-hp-text">100</span>)</strong>
-            <div class="health-bar"><div id="player-hp" class="health-fill"></div></div>
-        </div>
+        <!-- CANVAS TEMPAT GAME DIGAMBAR -->
+        <canvas id="gameCanvas" width="360" height="400"></canvas>
 
-        <div class="health-container">
-            <strong>🏰 Turret Musuh (HP: <span id="enemy-hp-text">100</span>)</strong>
-            <div class="health-bar"><div id="enemy-hp" class="health-fill"></div></div>
+        <!-- KONTROL SENTUH HP -->
+        <div id="controls">
+            <div id="joystick-zone">
+                <div id="joystick-base">
+                    <div id="joystick-stick"></div>
+                </div>
+            </div>
+            <div id="action-zone">
+                <button id="btn-attack" onclick="bukaSoal()">🔥 SKILL</button>
+            </div>
         </div>
-
-        <div class="score-board">
-            Skor Sementara: <strong id="score-text">0</strong>
-        </div>
-
-        <button class="btn-attack" onclick="bukaSoal()">🔥 SERANG / LUNCURKAN SKILL 🔥</button>
     </div>
 
-    <!-- POP-UP KUIS DRAMA -->
-    <div id="quiz-modal" class="modal hidden">
+    <!-- MODAL KUIS -->
+    <div id="quiz-modal" class="modal">
         <div class="modal-content">
             <span class="badge" id="kategori-soal">Materi Drama</span>
             <h4 id="soal-text">Pertanyaan...</h4>
