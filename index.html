@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MOBA Edukasi: Arena Bahasa & Drama</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background: #121212; color: white; margin: 0; padding: 10px; }
+        #app { max-width: 500px; margin: auto; background: #1e1e2f; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .hidden { display: none; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; font-size: 16px; }
+        input { background: #2a2a3d; color: white; border: 1px solid #444; }
+        button { background: #007bff; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:active { transform: scale(0.98); }
+        .btn-attack { background: linear-gradient(45deg, #ff9800, #ff5722); padding: 16px; font-size: 18px; font-weight: bold; margin-top: 15px; border-radius: 8px; box-shadow: 0 4px 10px rgba(255,152,0,0.4); }
+        .health-container { background: #2a2a3d; padding: 10px; border-radius: 8px; margin: 10px 0; text-align: left; }
+        .health-bar { background: #444; height: 18px; border-radius: 5px; overflow: hidden; margin-top: 5px; }
+        .health-fill { height: 100%; transition: width 0.4s ease-in-out; }
+        #player-hp { background: #28a745; width: 100%; }
+        #enemy-hp { background: #dc3545; width: 100%; }
+        .modal { background: rgba(0,0,0,0.85); position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: #252538; padding: 20px; border-radius: 10px; width: 90%; max-width: 450px; text-align: left; border: 1px solid #555; }
+        .opt-btn { background: #3a3a52; color: white; text-align: left; padding: 10px 12px; margin: 6px 0; font-size: 14px; border: 1px solid #555; }
+        .opt-btn:hover { background: #4a4a68; }
+        .badge { background: #17a2b8; padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-bottom: 5px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <!-- LAYAR UTAMA / LOGIN -->
+    <div id="login-screen">
+        <h2>⚔️ MOBA EDUKASI DRAMA ⚔️</h2>
+        <p style="color: #aaa; font-size: 14px;">Kuasai Unsur & Aturan Penulisan Drama untuk Menghancurkan Turret Musuh!</p>
+        <input type="text" id="nama" placeholder="Nama Lengkap" required>
+        <input type="text" id="kelas" placeholder="Kelas" required>
+        <button onclick="startGame()">MASUK ARENA</button>
+    </div>
+
+    <!-- ARENA PERTANDINGAN -->
+    <div id="game-screen" class="hidden">
+        <h3>⚔️ Pertarungan 1v1 Arena ⚔️</h3>
+        
+        <div class="health-container">
+            <strong>🛡️ Hero Kamu (HP: <span id="player-hp-text">100</span>)</strong>
+            <div class="health-bar"><div id="player-hp" class="health-fill"></div></div>
+        </div>
+
+        <div class="health-container">
+            <strong>🏰 Turret Musuh (HP: <span id="enemy-hp-text">100</span>)</strong>
+            <div class="health-bar"><div id="enemy-hp" class="health-fill"></div></div>
+        </div>
+
+        <div style="margin-top: 20px; font-size: 14px; color: #ccc;">
+            Skor Sementara: <strong id="score-text" style="color: #ffc107;">0</strong>
+        </div>
+
+        <button class="btn-attack" onclick="bukaSoal()">🔥 SERANG / LUNCURKAN SKILL 🔥</button>
+    </div>
+
+    <!-- POP-UP KUIS DRAMA -->
+    <div id="quiz-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="badge" id="kategori-soal">Materi Drama</span>
+            <h4 id="soal-text" style="margin-top: 5px;">Pertanyaan...</h4>
+            <div id="opsi-container"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // GANTI URL INI DENGAN URL GOOGLE APPS SCRIPT MILIKMU
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+
+    // BANK SOAL MATERI DRAMA
+    const bankSoal = [
+        {
+            kategori: "Unsur Drama",
+            q: "Petunjuk lakuan atau tindakan yang harus dilakukan oleh tokoh dalam naskah drama biasanya ditulis dalam tanda...",
+            ops: ["Tanda petik (\"...\")", "Tanda kurung (...) dan dicetak miring", "Tanda titik dua (:)", "Tanda seru (!)"],
+            a: 1
+        },
+        {
+            kategori: "Kebahasaan Drama",
+            q: "Format penulisan dialog drama yang benar di bawah ini adalah...",
+            ops: [
+                "Budi: \"Mengapa kamu terlambat?\"",
+                "Budi: Mengapa kamu terlambat?",
+                "Budi mengatakan, mengapa kamu terlambat?",
+                "\"Budi\" Mengapa kamu terlambat?"
+            ],
+            a: 1
+        },
+        {
+            kategori: "Pementasan Drama",
+            q: "Elemen pementasan drama yang bertugas mengatur pencahayaan di panggung untuk membangun suasana adalah...",
+            ops: ["Tata Busana (Kostum)", "Tata Lampu (Lighting)", "Tata Suara (Sound System)", "Tata Panggung (Sceneries)"],
+            a: 1
+        },
+        {
+            kategori: "Unsur Drama",
+            q: "Bagian dari alur drama yang menunjukkan puncak konflik atau ketegangan tertinggi dinamakan...",
+            ops: ["Orientasi", "Komplikasi", "Klimaks", "Resolusi"],
+            a: 2
+        },
+        {
+            kategori: "Kebahasaan Drama",
+            q: "Kalimat yang digunakan tokoh untuk memberikan perintah atau larangan dalam dialog drama menggunakan jenis kalimat...",
+            ops: ["Kalimat Deklaratif", "Kalimat Imperatif", "Kalimat Interogatif", "Kalimat Eksklamatif"],
+            a: 1
+        },
+        {
+            kategori: "Pementasan Drama",
+            q: "Orang yang bertanggung jawab memimpin proses latihan dan mengarahkan jalannya pementasan drama adalah...",
+            ops: ["Sutradara", "Produser", "Aktor", "Koreografer"],
+            a: 0
+        },
+        {
+            kategori: "Unsur Drama",
+            q: "Naskah pembuka atau kata pengantar yang biasanya disampaikan oleh narator sebelum pementasan drama dimulai disebut...",
+            ops: ["Prolog", "Epilog", "Monolog", "Dialog"],
+            a: 0
+        }
+    ];
+
+    let playerHp = 100;
+    let enemyHp = 100;
+    let skor = 0;
+    let currentSoalIndex = 0;
+
+    function startGame() {
+        const nama = document.getElementById("nama").value.trim();
+        const kelas = document.getElementById("kelas").value.trim();
+        if (!nama || !kelas) return alert("Harap isi Nama dan Kelas terlebih dahulu!");
+
+        document.getElementById("login-screen").classList.add("hidden");
+        document.getElementById("game-screen").classList.remove("hidden");
+    }
+
+    function bukaSoal() {
+        if (currentSoalIndex >= bankSoal.length) {
+            // Acak ulang atau putar balik jika soal habis
+            currentSoalIndex = 0;
+        }
+        
+        const soal = bankSoal[currentSoalIndex];
+        document.getElementById("kategori-soal").innerText = "Kategori: " + soal.kategori;
+        document.getElementById("soal-text").innerText = soal.q;
+        
+        const container = document.getElementById("opsi-container");
+        container.innerHTML = "";
+        
+        soal.ops.forEach((opt, idx) => {
+            const btn = document.createElement("button");
+            btn.className = "opt-btn";
+            btn.innerText = String.fromCharCode(65 + idx) + ". " + opt; // A, B, C, D
+            btn.onclick = () => jawab(idx === soal.a);
+            container.appendChild(btn);
+        });
+
+        document.getElementById("quiz-modal").classList.remove("hidden");
+    }
+
+    function jawab(isCorrect) {
+        document.getElementById("quiz-modal").classList.add("hidden");
+        
+        if (isCorrect) {
+            enemyHp -= 25;
+            skor += 15;
+            alert("💥 JAWABAN BENAR!\nSkill Berhasil Diluncurkan! Turret musuh menerima 25 Damage.");
+        } else {
+            playerHp -= 20;
+            alert("❌ JAWABAN SALAH!\nSeranganmu Meleset! Musuh membalas dan memberikan 20 Damage padamu.");
+        }
+
+        updateHpBar();
+        currentSoalIndex++;
+        cekKondisiSelesai();
+    }
+
+    function updateHpBar() {
+        playerHp = Math.max(0, playerHp);
+        enemyHp = Math.max(0, enemyHp);
+
+        document.getElementById("player-hp").style.width = playerHp + "%";
+        document.getElementById("enemy-hp").style.width = enemyHp + "%";
+        
+        document.getElementById("player-hp-text").innerText = playerHp;
+        document.getElementById("enemy-hp-text").innerText = enemyHp;
+        document.getElementById("score-text").innerText = skor;
+    }
+
+    function cekKondisiSelesai() {
+        if (enemyHp <= 0) {
+            alert("🏆 VICTORY!\nSelamat! Kamu berhasil meruntuhkan Turret Musuh dengan pengetahuan Dramamu!");
+            kirimData("Victory");
+        } else if (playerHp <= 0) {
+            alert("☠️ DEFEAT!\nKaraktermu tumbang! Pelajari kembali materi drama dan coba lagi.");
+            kirimData("Defeat");
+        }
+    }
+
+    function kirimData(status) {
+        const data = {
+            nama: document.getElementById("nama").value,
+            kelas: document.getElementById("kelas").value,
+            skor: skor,
+            status: status
+        };
+
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }).then(() => {
+            alert("Data nilai berhasil disimpan ke Google Sheets!");
+            location.reload();
+        }).catch((err) => {
+            console.error("Gagal mengirim data:", err);
+            alert("Selesai! (Gagal terhubung ke Sheet, periksa URL Script)");
+            location.reload();
+        });
+    }
+</script>
+
+</body>
+</html>
